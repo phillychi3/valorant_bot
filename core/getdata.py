@@ -4,14 +4,21 @@ import urllib
 from io import BytesIO
 
 header = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'}
-# large_font = ImageFont.truetype('./font/setofont.ttf', 40)
-# font = ImageFont.truetype('./font/setofont.ttf', 30)
-# medium_font = ImageFont.truetype('./font/setofont.ttf', 26) 
-# small_font = ImageFont.truetype('./font/setofont.ttf', 22)
-large_font = ImageFont.truetype('../font/setofont.ttf', 40)
-font = ImageFont.truetype('../font/setofont.ttf', 30)
-medium_font = ImageFont.truetype('../font/setofont.ttf', 26) 
-small_font = ImageFont.truetype('../font/setofont.ttf', 22)
+large_font = ImageFont.truetype('./font/setofont.ttf', 40)
+font = ImageFont.truetype('./font/setofont.ttf', 30)
+medium_font = ImageFont.truetype('./font/setofont.ttf', 26) 
+small_font = ImageFont.truetype('./font/setofont.ttf', 22)
+# large_font = ImageFont.truetype('../font/setofont.ttf', 40)
+# font = ImageFont.truetype('../font/setofont.ttf', 30)
+# medium_font = ImageFont.truetype('../font/setofont.ttf', 26) 
+# small_font = ImageFont.truetype('../font/setofont.ttf', 22)
+
+cast = {
+    "c_cast":2,
+    "q_cast":0,
+    "e_cast":1,
+    "x_cast":3,
+}
 
 def battle_generate_image(data):
     im = Image.new("RGB",(1000,1000),(255,255,255))
@@ -50,13 +57,21 @@ def battle_generate_image(data):
     return buffer
     
 def one_battle_generate_image(data):
+    igd = requests.get("https://valorant-api.com/v1/agents",headers=header).json()
+
+    def get_agent(name):
+        for i in igd["data"]:
+            if i["displayName"] == name:
+                return i["abilities"]
     im = Image.new("RGB",(1000,1000),(255,255,255))
     imdraw = ImageDraw.Draw(im)
     avpos = 0
     imdraw.rectangle((0,0,500,1000),fill=(214, 48, 49,1))
     imdraw.rectangle((500,0,1000,1000),fill=(0, 184, 148,1))
+    
     for i in data["red"]:
         req = urllib.request.Request(i["image"] ,headers=header)
+        pimage = get_agent(i["character"])
         with urllib.request.urlopen(req) as response:
             img = response.read()
         avatar = Image.open(BytesIO(img))
@@ -76,10 +91,24 @@ def one_battle_generate_image(data):
         imdraw.text((380,avpos+50), "hs\n" + hs,fill=(255,255,255,255),font=font)
         imdraw.text((430,avpos+50), "adr\n" + adr,fill=(255,255,255,255),font=font)
         imdraw.rectangle((0,avpos+190,500,avpos+200),fill=(45, 52, 54,1))
+        ppos = 0
+        for j in i["ability"]:
+            img = pimage[int(cast[j])]["displayIcon"]
+            req = urllib.request.Request(img ,headers=header)
+            with urllib.request.urlopen(req) as response:
+                img = response.read()
+            img = Image.open(BytesIO(img))
+            img = img.resize((50,50))
+            im.paste(img,(ppos+20,avpos+120))
+            imdraw.text((ppos+80,avpos+120), str(i["ability"][j]),fill=(255,255,255,255),font=font)
+            ppos+=100
+
+
         avpos+=200
     avpos = 0
     for i in data["blue"]:
         req = urllib.request.Request(i["image"] ,headers=header)
+        pimage = get_agent(i["character"])
         with urllib.request.urlopen(req) as response:
             img = response.read()
         avatar = Image.open(BytesIO(img))
@@ -99,13 +128,26 @@ def one_battle_generate_image(data):
         imdraw.text((880,avpos+50), "hs\n" + hs,fill=(255,255,255,255),font=font)
         imdraw.text((930,avpos+50), "adr\n" + adr,fill=(255,255,255,255),font=font)
         imdraw.rectangle((500,avpos+190,1000,avpos+200),fill=(45, 52, 54,1))
+        ppos = 500
+        for j in i["ability"]:
+            img = pimage[int(cast[j])]["displayIcon"]
+            req = urllib.request.Request(img ,headers=header)
+            with urllib.request.urlopen(req) as response:
+                img = response.read()
+            img = Image.open(BytesIO(img))
+            img = img.resize((50,50))
+            im.paste(img,(ppos+20,avpos+120))
+            imdraw.text((ppos+80,avpos+120), str(i["ability"][j]),fill=(255,255,255,255),font=font)
+            ppos+=100
+
+
         avpos+=200
     imdraw.rectangle((490,0,500,1000),fill=(45, 52, 54,1))
-    im.show()
-    # buffer = BytesIO()
-    # im.save(buffer, 'png')
-    # buffer.seek(0)
-    # return buffer
+    #im.show()
+    buffer = BytesIO()
+    im.save(buffer, 'png')
+    buffer.seek(0)
+    return buffer
 
 
 def get_placer_battle_info(player,tag,place):
@@ -168,6 +210,8 @@ def get_one_battle(player,tag,place,ct):
         rpdata["stats"] = i["stats"]
         rpdata["damage"] = i["damage_made"]
         rpdata["image"] = i["assets"]["agent"]["small"]
+        rpdata["ability"] = i["ability_casts"]
+        rpdata["character"] = i["character"]
         if rpdata["stats"]["headshots"]+rpdata["stats"]["bodyshots"] == 0:
             rpdata["hs"] = "0%"
         else:
@@ -181,6 +225,8 @@ def get_one_battle(player,tag,place,ct):
         bpdata["stats"] = i["stats"]
         bpdata["damage"] = i["damage_made"]
         bpdata["image"] = i["assets"]["agent"]["small"]
+        bpdata["ability"] = i["ability_casts"]
+        bpdata["character"] = i["character"]
         if bpdata["stats"]["headshots"]+bpdata["stats"]["bodyshots"] == 0:
             bpdata["hs"] = "0%"
         else:

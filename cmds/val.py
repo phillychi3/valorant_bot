@@ -17,9 +17,21 @@ class val(Cog_Extension):
         if str(ctx.author.id) not in jdata:
             await ctx.send('您尚未註冊，請使用addplayer')
             return
-        await ctx.send(file=discord.File(fp=battle_generate_image(get_placer_battle_info("phillychi3","4353","ap")), filename='r6players.png'))
+        pd = jdata[str(ctx.author.id)]
+        await ctx.send(file=discord.File(fp=battle_generate_image(get_placer_battle_info(pd["name"],pd["tag"],pd["region"])), filename='r6players.png'))
         
-
+    @commands.command()
+    async def onematched(self, ctx,select):
+        with open('players.json', 'r', encoding='utf8') as jfile:
+            jdata = json.load(jfile)
+        if str(ctx.author.id) not in jdata:
+            await ctx.send('您尚未註冊，請使用addplayer')
+            return
+        if not select.isdigit() or int(select) >5 or int(select) < 1:
+            await ctx.send('請輸入1~5')
+            return 
+        pd = jdata[str(ctx.author.id)]
+        await ctx.send(file=discord.File(fp=one_battle_generate_image(get_one_battle(pd["name"],pd["tag"],pd["region"],int(select)+1)), filename='r6players.png'))
 
     @commands.command()
     async def addplayer(self, ctx, player):
