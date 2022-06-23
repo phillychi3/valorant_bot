@@ -31,7 +31,7 @@ class val(Cog_Extension):
             await ctx.send('請輸入1~5')
             return 
         pd = jdata[str(ctx.author.id)]
-        await ctx.send(file=discord.File(fp=one_battle_generate_image(get_one_battle(pd["name"],pd["tag"],pd["region"],int(select)+1)), filename='r6players.png'))
+        await ctx.send(file=discord.File(fp=one_battle_generate_image(get_one_battle(pd["name"],pd["tag"],pd["region"],int(select)-1)), filename='r6players.png'))
 
     @commands.command()
     async def addplayer(self, ctx, player):
