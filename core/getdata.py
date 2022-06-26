@@ -170,7 +170,10 @@ def get_placer_battle_info(player,tag,place):
             if j["name"] == player:
                 pdata["stats"] = j["stats"]
                 pdata["team"] = j["team"]
-                pdata["damage"] = j["damage_made"]
+                if "damage_made" in j:
+                    pdata["damage"] = j["damage_made"]
+                else:
+                    pdata["damage"] = "None"
                 pdata["image"] = j["assets"]["agent"]["small"]
                 break
         # 地區資料
@@ -188,7 +191,10 @@ def get_placer_battle_info(player,tag,place):
             pdata["hs"] = "0%"
         else:
             pdata["hs"] = str(int(pdata["stats"]["headshots"]*100/(pdata["stats"]["headshots"]+pdata["stats"]["bodyshots"]))) + "%"
-        pdata["adr"] = str(int(pdata["damage"]/pdata["round"]["rounds"]))
+        if pdata["damage"] == "None":
+            pdata["adr"] = "None"
+        else:
+            pdata["adr"] = str(int(pdata["damage"]/pdata["round"]["rounds"]))
         pdata["kd"] = str(round(pdata["stats"]["kills"]/pdata["stats"]["deaths"],2))
         pdlist.append(pdata)
     return pdlist
@@ -208,6 +214,10 @@ def get_one_battle(player,tag,place,ct):
         rpdata = {}
         rpdata["name"] = i["name"]
         rpdata["stats"] = i["stats"]
+        if "damage_made" in i:
+            rpdata["damage"] = i["damage_made"]
+        else:
+            rpdata["damage"] = "None"
         rpdata["damage"] = i["damage_made"]
         rpdata["image"] = i["assets"]["agent"]["small"]
         rpdata["ability"] = i["ability_casts"]
@@ -216,14 +226,20 @@ def get_one_battle(player,tag,place,ct):
             rpdata["hs"] = "0%"
         else:
             rpdata["hs"] = str(int(rpdata["stats"]["headshots"]*100/(rpdata["stats"]["headshots"]+rpdata["stats"]["bodyshots"]))) + "%"
-        rpdata["adr"] = str(int(rpdata["damage"]/pdata["rounds"]))
+        if rpdata["damage"] == "None":
+            rpdata["adr"] = "None"
+        else:
+            rpdata["adr"] = str(int(rpdata["damage"]/pdata["rounds"]))
         rpdata["kd"] = str(round(rpdata["stats"]["kills"]/rpdata["stats"]["deaths"],2))
         pdata["red"].append(rpdata)
     for i in data["data"][ct]["players"]["blue"]:
         bpdata = {}
         bpdata["name"] = i["name"]
         bpdata["stats"] = i["stats"]
-        bpdata["damage"] = i["damage_made"]
+        if "damage_made" in i:
+            bpdata["damage"] = i["damage_made"]
+        else:
+            bpdata["damage"] = "None"
         bpdata["image"] = i["assets"]["agent"]["small"]
         bpdata["ability"] = i["ability_casts"]
         bpdata["character"] = i["character"]
@@ -231,7 +247,10 @@ def get_one_battle(player,tag,place,ct):
             bpdata["hs"] = "0%"
         else:
             bpdata["hs"] = str(int(bpdata["stats"]["headshots"]*100/(bpdata["stats"]["headshots"]+bpdata["stats"]["bodyshots"]))) + "%"
-        bpdata["adr"] = str(int(bpdata["damage"]/pdata["rounds"]))
+        if bpdata["damage"] == "None":
+            bpdata["adr"] = "None"
+        else:
+            bpdata["adr"] = str(int(bpdata["damage"]/pdata["rounds"]))
         bpdata["kd"] = str(round(bpdata["stats"]["kills"]/bpdata["stats"]["deaths"],2))
         pdata["blue"].append(bpdata)
     return pdata
