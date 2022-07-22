@@ -26,21 +26,6 @@ class Event(Cog_Extension):
         else:  # 使用 Default Error Handler
             await Errors.default_error(self, ctx, error)
 
-    @commands.Cog.listener()
-    async def on_member_join(self, member):
-        print(f'{member} join {member.guild.name}!')
-        guild = member.guild.name
-        if guild == "軟軟的FBK":
-            channel = self.bot.get_channel(int("811225288389951538"))
-            embed = discord.Embed(title=f"歡迎{member}進入fbk香香的尾巴", description="0w0",
-                                  color=0x1fb32d, timestamp=datetime.datetime.now(datetime.timezone.utc))
-            embed.set_thumbnail(url=f"{member.avatar_url}")
-
-            embed.add_field(
-                name="伺服器人數：", value=f"{member.guild.member_count}", inline=True)
-            embed.add_field(name=member, value="請先看看公告喔")
-            embed.set_footer(text="FBK專用bot")
-            await channel.send(embed=embed)
 
 
 def setup(bot):
